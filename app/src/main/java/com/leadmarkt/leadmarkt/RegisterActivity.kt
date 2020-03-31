@@ -50,6 +50,8 @@ class RegisterActivity : AppCompatActivity() {
             }
 
 
+
+
             //Veritabanından alınan verileri getiriyor
             db.collection("Users").addSnapshotListener { snapshot, exception ->
                 if (exception != null) {

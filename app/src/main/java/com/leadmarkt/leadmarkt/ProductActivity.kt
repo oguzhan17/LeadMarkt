@@ -2,6 +2,7 @@ package com.leadmarkt.leadmarkt
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 
@@ -26,6 +27,7 @@ class ProductActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
+        val currentUser = auth.currentUser
 
 
         //get intent
@@ -36,6 +38,7 @@ class ProductActivity : AppCompatActivity() {
 
         }
 
+
         getDataFromFirestore()
 
         //RecyclerView
@@ -44,9 +47,65 @@ class ProductActivity : AppCompatActivity() {
 
         adapter = ProductAdapter(userName,userComment)
         recyclerView.adapter = adapter
-
-
     }
+
+
+    //COMMENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+    fun addComment (view: View){
+     //   val comment = commentEditText.text.toString().trim()
+        val usermail = auth.currentUser?.email.toString()
+
+        db.collection("Users").addSnapshotListener { snapshot, exception ->
+            if (exception != null){
+                Toast.makeText(applicationContext,exception.localizedMessage?.toString(),Toast.LENGTH_LONG).show()
+            }else{
+
+                if (snapshot!=null){
+                    if(!snapshot.isEmpty){
+                        val documentsUser = snapshot.documents
+                        val currentMail = auth.currentUser?.email.toString()
+
+                        for(documentUser in documentsUser ){
+
+
+                            val emailFB = documentUser.get("email") as? String
+                         //  println("emailFB   "+emailFB)
+
+                            if (emailFB == currentMail) {
+
+
+                                val commentMap = hashMapOf<String, Any>()
+                               val name = documentUser.get("name") as? String
+                               val surname = documentUser.get("surname") as? String
+                                val comment = commentEditText.text.toString().trim()
+                                val namesurname = name + " " + surname
+                                if (name != null) {
+                                    commentMap.put("name",namesurname)
+                                }
+                                if (surname != null) {
+                                    commentMap.put("surname",surname)
+                                }
+                                commentMap.put("comment",comment)
+                                commentMap.put("barcodeNo",barcodeTextView.text.toString())
+
+                                println(commentMap)
+
+                                db.collection("Comment").add(commentMap).addOnCompleteListener { task ->
+                                    if (task.isComplete && task.isSuccessful) {
+                                        //  println("auth current user $auth.currentUser!!.email")
+                                        getDataFromFirestore()
+                                    }
+                                }.addOnFailureListener{exception ->
+                                    Toast.makeText(applicationContext,exception.localizedMessage.toString(),Toast.LENGTH_LONG).show()
+                                }
+                            }}}}}}}
+
+
+
+    //COMMENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+
+
+
 
     fun getDataFromFirestore() {
 
@@ -55,18 +114,16 @@ class ProductActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext,exception.localizedMessage?.toString(),Toast.LENGTH_LONG).show()
             }else{
 
-                if (snapshot!=null)
+                if (snapshot!=null){
                     if(!snapshot.isEmpty){
                         val documents = snapshot.documents
                      
 
                         for(document in documents ){
 
-
-
                             val barcodeNo = document.get("barcodeNo") as? String
-//                            val name = document.get("name") as? String
-//                            val comment = document.get("comment") as? String
+                            val name = document.get("name") as? String
+                            val comment = document.get("comment") as? String
                             val title = document.get("product_title") as? String
                             val img= document.get("product_image") as? String
 
@@ -102,29 +159,23 @@ class ProductActivity : AppCompatActivity() {
                                                    if (barcodeNo.toString() == barcodeTextView.text.toString() ) {
 
 
-
-                                                       userName.add(name.toString())
-                                                       userComment.add(comment.toString())
+                                                       if (name != null) {
+                                                           userName.add(name)
+                                                       }
+                                                       if (comment != null) {
+                                                           userComment.add(comment)
+                                                       }
                                                        adapter!!.notifyDataSetChanged()
 
-                                                       println(barcodeNo)
-
-                                                       println(userName)
-                                                       println(userComment)
-
-
-
                                                    }
-
-
-
+                                                   else{}
 
                                                }}}}
 
                                // barcodeTextView.text = textviewtext.toString()
 
                          }
-
+else{}
 
                         /*
                            if (nameTextView.text=="TextView"){
@@ -137,6 +188,6 @@ class ProductActivity : AppCompatActivity() {
                                startActivity(intent)
                                finish() }
 */
-                        else{}
+                            //       else{}
 
-                        }}}}}}
+                        }}}}}}}
