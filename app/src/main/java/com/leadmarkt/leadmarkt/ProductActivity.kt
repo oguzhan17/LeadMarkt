@@ -24,6 +24,11 @@ class ProductActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product)
+        
+        //actionbar
+        val actionbar = supportActionBar
+        actionbar!!.title = "LeadMarkt"
+        actionbar.setDisplayHomeAsUpEnabled(true)
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -48,6 +53,16 @@ class ProductActivity : AppCompatActivity() {
         adapter = ProductAdapter(userName,userComment)
         recyclerView.adapter = adapter
     }
+    
+    //Back Press
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+    override fun onBackPressed() {
+        startActivity(Intent(this@ProductActivity, ScanActivity::class.java))
+    }
+    //Back Press
 
 
     //COMMENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
